@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Appointment Booking API
+  version: "1.0"
+  contact:
+    name: GCdM
+    url: "https://github.com/GCdM"
+    email: gcdevm@protonmail.com
+  description: Sample API for an appointment booking application.
+paths:
+  /availabilities:
+    get:
+      description: Retrieve all availabilities. Can specify a `date_range`, `appointment_type`, and `appointment_medium` to filter results.
+      parameters:
+        - name: date_range
+          in: query
+          description: Date range to filter availabilities by. DESCRIBE FORMAT.
+          example: SHOW EXAMPLE
+          schema:
+            type: string
+        - name: appointment_type
+          in: query
+          description: Type of appointment to filter availabilities by.
+          example: consultation
+          schema:
+            type: string
+        - name: appointment_medium
+          in: query
+          description: Appointment medium to filter availabilities by.
+          example: phone
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful retrieval of all appointments, taking into account filtering options.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: integer
+                    datetime:
+                      type: string
+    post:
+      description: Create a new availability for a given counsellor.
+      requestBody:
+        description: Counsellor id and time for new availability.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                counsellor_id:
+                  type: string
+                  example: 79590113-a6a3-45c3-9d5e-28472a8c4a74
+                datetime:
+                  type: string
+                  example: "2020-10-25T19:00:00.000Z"
+      responses:
+        200:
+          description: Successfully created new availability for given counsellor.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 3
+                  counsellor_id:
+                    type: string
+                    example: 79590113-a6a3-45c3-9d5e-28472a8c4a74
+                  datetime:
+                    type: string
+                    example: "2020-10-25T19:00:00.000Z"
