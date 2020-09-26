@@ -12,12 +12,21 @@ app.use((req, res, next) => {
   // Logging middleware for development/debugging
   console.log("\n>>> >>> >>> >>> REQUEST >>> >>> >>> >>>\n");
   console.log(req.method, "\t", req.path);
-  if (req.method !== "GET") console.log("\nreq.body: ", req.body);
+  if (req.method === "GET") {
+    console.log("\nreq.query: ", req.query);
+  } else {
+    console.log("\nreq.body: ", req.body);
+  }
   console.log("\n<<< <<< <<< <<< <<< <<< <<< <<< <<< <<<");
+
   next();
 });
 
 app.get("/availabilities", async (req, res) => {
+  const dateRange = req.query.date_range;
+  const [earlierDate, laterDate] = dateRange.split("/");
+
+  debugger;
   const allAvailabilities = await db.Availability.findAll();
 
   res.status(200).json(allAvailabilities);
