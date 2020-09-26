@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const { Op } = require("sequelize");
 
 const db = require("./database/db");
 
@@ -23,13 +24,36 @@ app.use((req, res, next) => {
 });
 
 app.get("/availabilities", async (req, res) => {
-  const dateRange = req.query.date_range;
-  const [earlierDate, laterDate] = dateRange.split("/");
+  const {
+    date_range: dateRange,
+    appointment_type: type,
+    appointment_medium: medium,
+  } = req.query;
 
-  debugger;
-  const allAvailabilities = await db.Availability.findAll();
+  const where = {};
 
-  res.status(200).json(allAvailabilities);
+  if (dateRange || type || medium) {
+    // Prepare filtering conditions by creating `where` object in accordance with Sequelize's documentation
+
+    if (dateRange) {
+      const [fromDate, toDate] = dateRange.split("/");
+
+      where.datetime = {
+        [Op.gt]: new Date(fromDate),
+        [Op.lt]: new Date(toDate),
+      };
+    }
+  }
+
+  try {
+    const allAvailabilities = await db.Availability.findAll({ where });
+
+    debugger;
+    res.status(200).json(allAvailabilities);
+  } catch (error) {
+    debugger;
+    res.status(400).json({ error });
+  }
 });
 
 app.post("/availabilities", async (req, res) => {
