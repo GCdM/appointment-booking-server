@@ -41,3 +41,11 @@ For a simple API such as this, this was definitely overkill, but I've found it i
 I chose to use Postgres as the DBMS as most of my experience is with relational databases, and I knew this was a technology Spill worked with (even though the original format of the data makes me think it originated from a MongoDB database or other NoSQL DBMS).
 
 ## [Link to Schema/ERD](https://dbdiagram.io/d/5f6f165e7da1ea736e2f6eb2)
+
+# Application
+
+## Libraries
+
+- [`express`](https://expressjs.com/) - "Minimalist web framework"
+- [`sequelize`](https://sequelize.org/master/index.html) - "Promise based Node.js ORM"
+- [`body-parser`](https://github.com/expressjs/body-parser#readme) - Middleware for parsing request bodies (in this case, for parsing JSON).
