@@ -11,8 +11,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/availabilities", (req, res) => {
-  res.send("Testing");
+app.get("/availabilities", async (req, res) => {
+  const allAvailabilities = await db.Availability.findAll();
+  res.json(allAvailabilities);
 });
 
 app.listen(PORT, () => {

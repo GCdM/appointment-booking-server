@@ -100,8 +100,8 @@ Medium.init(
   }
 );
 
-Counsellor.hasMany(Availability);
-Availability.belongsTo(Counsellor);
+Counsellor.hasMany(Availability, { foreignKey: "counsellorId" });
+Availability.belongsTo(Counsellor, { foreignKey: "counsellorId" });
 
 Counsellor.belongsToMany(Type, { through: "CounsellorType" });
 Type.belongsToMany(Counsellor, { through: "CounsellorType" });
