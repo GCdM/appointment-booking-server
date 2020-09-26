@@ -32,26 +32,53 @@ app.get("/availabilities", async (req, res) => {
 
   const where = {};
 
-  if (dateRange || type || medium) {
-    // Prepare filtering conditions by creating `where` object in accordance with Sequelize's documentation
+  // if (dateRange || type || medium) {
+  // Prepare filtering conditions by creating `where` object in accordance with Sequelize's documentation
+  if (dateRange) {
+    const [fromDate, toDate] = dateRange.split("/");
 
-    if (dateRange) {
-      const [fromDate, toDate] = dateRange.split("/");
-
-      where.datetime = {
-        [Op.gt]: new Date(fromDate),
-        [Op.lt]: new Date(toDate),
-      };
-    }
+    where.datetime = {
+      [Op.gt]: new Date(fromDate),
+      [Op.lt]: new Date(toDate),
+    };
   }
+  // }
 
   try {
     const allAvailabilities = await db.Availability.findAll({ where });
 
-    debugger;
-    res.status(200).json(allAvailabilities);
+    // Filter
+    const availabilitiesFilteringResultPromises = allAvailabilities.map(
+      async (availability) => {
+        if (!type && !medium) return true;
+
+        const counsellor = await availability.getCounsellor();
+        const counsellorTypes = await counsellor.getTypes();
+        const types = counsellorTypes.map((t) => t.name);
+        const counsellorMedia = await counsellor.getMedia();
+        const media = counsellorMedia.map((m) => m.name);
+
+        if (
+          (type && !types.includes(type)) ||
+          (medium && !media.includes(medium))
+        ) {
+          return false;
+        } else {
+          return true;
+        }
+      }
+    );
+
+    const availabilitiesFilteringResults = await Promise.all(
+      availabilitiesFilteringResultPromises
+    );
+
+    const availabilitiesByTypeAndMedium = allAvailabilities.filter(
+      (availability, index) => availabilitiesFilteringResults[index]
+    );
+
+    res.status(200).json(availabilitiesByTypeAndMedium);
   } catch (error) {
-    debugger;
     res.status(400).json({ error });
   }
 });
