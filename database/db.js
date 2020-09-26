@@ -1,4 +1,4 @@
-const { Sequelize, Model, DataTypes } = require("sequelize");
+const { Sequelize, Model, DataTypes, UUIDV4 } = require("sequelize");
 
 // Connect to DB
 console.log("Connecting to database...");
@@ -24,6 +24,11 @@ class Counsellor extends Model {}
 
 Counsellor.init(
   {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: Sequelize.UUIDV4,
+    },
     firstName: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -43,6 +48,9 @@ class Availability extends Model {}
 
 Availability.init(
   {
+    originalId: {
+      type: DataTypes.STRING,
+    },
     counsellorId: {
       type: Sequelize.UUID,
       allowNull: false,
@@ -52,7 +60,7 @@ Availability.init(
       },
     },
     datetime: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       allowNull: false,
     },
   },
@@ -101,9 +109,10 @@ Type.belongsToMany(Counsellor, { through: "CounsellorType" });
 Counsellor.belongsToMany(Medium, { through: "CounsellorMedium" });
 Medium.belongsToMany(Counsellor, { through: "CounsellorMedium" });
 
-sequelize.sync();
+// sequelize.sync();
 
 module.exports = {
+  sequelize,
   Counsellor,
   Availability,
   Type,
