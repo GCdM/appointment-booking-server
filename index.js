@@ -35,11 +35,16 @@ app.get("/availabilities", async (req, res) => {
   // if (dateRange || type || medium) {
   // Prepare filtering conditions by creating `where` object in accordance with Sequelize's documentation
   if (dateRange) {
-    const [fromDate, toDate] = dateRange.split("/");
+    const [fromDateString, toDateString] = dateRange.split("/");
+    const fromDate = new Date(fromDateString);
+    const toDate = new Date(toDateString);
+
+    // Add 1 day to the end date, so that results include it
+    toDate.setDate(toDate.getDate() + 1);
 
     where.datetime = {
-      [Op.gt]: new Date(fromDate),
-      [Op.lt]: new Date(toDate),
+      [Op.gte]: fromDate,
+      [Op.lte]: toDate,
     };
   }
   // }
@@ -51,16 +56,15 @@ app.get("/availabilities", async (req, res) => {
     const availabilitiesFilteringResultPromises = allAvailabilities.map(
       async (availability) => {
         if (!type && !medium) return true;
-
-        const counsellor = await availability.getCounsellor();
-        const counsellorTypes = await counsellor.getTypes();
-        const types = counsellorTypes.map((t) => t.name);
-        const counsellorMedia = await counsellor.getMedia();
-        const media = counsellorMedia.map((m) => m.name);
+        const counsellor = await availability.getCounsellor({
+          include: [db.Type, db.Medium],
+        });
+        const typeNames = counsellor.Types.map((t) => t.name);
+        const mediaNames = counsellor.Media.map((m) => m.name);
 
         if (
-          (type && !types.includes(type)) ||
-          (medium && !media.includes(medium))
+          (type && !typeNames.includes(type)) ||
+          (medium && !mediaNames.includes(medium))
         ) {
           return false;
         } else {
