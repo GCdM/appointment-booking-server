@@ -9,19 +9,19 @@ const PORT = 3000;
 
 app.use(bodyParser.json());
 
-app.use((req, res, next) => {
-  // Logging middleware for development/debugging
-  console.log("\n>>> >>> >>> >>> REQUEST >>> >>> >>> >>>\n");
-  console.log(req.method, "\t", req.path);
-  if (req.method === "GET") {
-    console.log("\nreq.query: ", req.query);
-  } else {
-    console.log("\nreq.body: ", req.body);
-  }
-  console.log("\n<<< <<< <<< <<< <<< <<< <<< <<< <<< <<<");
+// app.use((req, res, next) => {
+//   // Logging middleware for development/debugging
+//   console.log("\n>>> >>> >>> >>> REQUEST >>> >>> >>> >>>\n");
+//   console.log(req.method, "\t", req.path);
+//   if (req.method === "GET") {
+//     console.log("\nreq.query: ", req.query);
+//   } else {
+//     console.log("\nreq.body: ", req.body);
+//   }
+//   console.log("\n<<< <<< <<< <<< <<< <<< <<< <<< <<< <<<");
 
-  next();
-});
+//   next();
+// });
 
 app.get("/availabilities", async (req, res) => {
   const {
@@ -33,9 +33,20 @@ app.get("/availabilities", async (req, res) => {
   const errors = [];
   const where = {};
 
-  // if (dateRange || type || medium) {
-  // Prepare filtering conditions by creating `where` object in accordance with Sequelize's documentation
+  if (type && !["consultation", "one_off"].includes(type)) {
+    errors.push(
+      `Invalid appointment_type: ${type}. Make sure it is one of 'consultation' or 'one_off'.`
+    );
+  }
+
+  if (medium && !["video", "phone"].includes(medium)) {
+    errors.push(
+      `Invalid appointment_medium: ${medium}. Make sure it is one of 'video' or 'phone'.`
+    );
+  }
+
   if (dateRange) {
+    // Prepare filtering conditions by creating `where` object in accordance with Sequelize's documentation
     const [fromDateString, toDateString] = dateRange.split("/");
     const fromDate = new Date(fromDateString);
     const toDate = new Date(toDateString);
@@ -55,54 +66,16 @@ app.get("/availabilities", async (req, res) => {
     };
   }
 
-  if (type && !["consultation", "one_off"].includes(type)) {
-    errors.push(
-      `Invalid appointment_type: ${type}. Make sure it is one of 'consultation' or 'one_off'.`
-    );
-  }
-
-  if (medium && !["video", "phone"].includes(medium)) {
-    errors.push(
-      `Invalid appointment_medium: ${medium}. Make sure it is one of 'video' or 'phone'.`
-    );
-  }
-  // }
-
   try {
     if (errors.length) throw errors;
 
-    const allAvailabilities = await db.Availability.findAll({ where });
+    const matchingAvailabilities = await db.Availability.advancedFind({
+      where,
+      type,
+      medium,
+    });
 
-    // Filter
-    const availabilitiesFilteringResultPromises = allAvailabilities.map(
-      async (availability) => {
-        if (!type && !medium) return true;
-        const counsellor = await availability.getCounsellor({
-          include: [db.Type, db.Medium],
-        });
-        const typeNames = counsellor.Types.map((t) => t.name);
-        const mediaNames = counsellor.Media.map((m) => m.name);
-
-        if (
-          (type && !typeNames.includes(type)) ||
-          (medium && !mediaNames.includes(medium))
-        ) {
-          return false;
-        } else {
-          return true;
-        }
-      }
-    );
-
-    const availabilitiesFilteringResults = await Promise.all(
-      availabilitiesFilteringResultPromises
-    );
-
-    const availabilitiesByTypeAndMedium = allAvailabilities.filter(
-      (availability, index) => availabilitiesFilteringResults[index]
-    );
-
-    res.status(200).json(availabilitiesByTypeAndMedium);
+    res.status(200).json(matchingAvailabilities);
   } catch (error) {
     res.status(400).json({ error });
   }
@@ -115,6 +88,7 @@ app.post("/availabilities", async (req, res) => {
     const existingAvailability = await db.Availability.findOne({
       where: { counsellorId, datetime },
     });
+
     if (existingAvailability)
       throw Error(
         `This counsellor already has an availability for ${datetime}.`
