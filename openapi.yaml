@@ -41,8 +41,22 @@ paths:
                   properties:
                     id:
                       type: integer
+                      example: 7341
                     datetime:
                       type: string
+                      example: "2020-11-18T22:00:00.000Z"
+                    counsellorId:
+                      type: string
+                      example: "79590113-a6a3-45c3-9d5e-28472a8c4a74"
+                    updatedAt:
+                      type: string
+                      example: "2020-09-27T12:40:18.403Z"
+                    createdAt:
+                      type: string
+                      example: "2020-09-27T12:40:18.403Z"
+                    originalId:
+                      type: string
+                      example: "88ZAQZbhu2Hf7CyVUmASLM"
     post:
       description: Create a new availability for a given counsellor.
       requestBody:
@@ -64,14 +78,25 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                    example: 3
-                  counsellor_id:
-                    type: string
-                    example: "79590113-a6a3-45c3-9d5e-28472a8c4a74"
-                  datetime:
-                    type: string
-                    example: "2020-10-25T19:00:00.000Z"
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 3
+                    datetime:
+                      type: string
+                      example: "2020-10-25T19:00:00.000Z"
+                    counsellorId:
+                      type: string
+                      example: "79590113-a6a3-45c3-9d5e-28472a8c4a74"
+                    updatedAt:
+                      type: string
+                      example: "2020-09-27T12:40:18.403Z"
+                    createdAt:
+                      type: string
+                      example: "2020-09-27T12:40:18.403Z"
+                    originalId:
+                      type: string
+                      example: "88ZAQZbhu2Hf7CyVUmASLM"

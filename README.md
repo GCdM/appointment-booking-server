@@ -8,7 +8,7 @@ After running `npm i`, follow these steps:
 
 ## Create a new database in Postgres
 
-The application is currently set up to connect to a locally run Postgres server, and to a database with the name `appointment_booking_service_development`, with the user `postgres`, and no password. You'll need to create a database in Postgres with this name.
+The application is currently set up to connect to a Postgres database with the name `appointment_booking_service_development`, with the user `postgres`, and no password. You'll need to create a database in Postgres with this name.
 
 _If you'd like to use a different configuration for your database, you can change these values in `./.env` (which I purposefully did not `.gitignore`)._
 
@@ -30,7 +30,7 @@ _*NOTE* This will drop all existing tables and recreate them. Any data that is n
 
 # Documentation
 
-I chose to document the API by following the [OpenAPI Specification](https://spec.openapis.org/oas/v3.0.3#openapi-document), and this can be found in `./openapi.yaml`. For this excercise, this was definitely overkill, but I've found it is good practice to design any API before implementing it.
+I chose to document the API by following the [OpenAPI Specification](https://spec.openapis.org/oas/v3.0.3#openapi-document), and this can be found in `./openapi.yaml`. For this exercise, this was definitely overkill, but I've found it is good practice to design any API before implementing it.
 
 # Database
 
@@ -49,7 +49,7 @@ I chose to use Sequelize as it is a popular ORM that I had a bit of experience w
 - [`express`](https://expressjs.com/) - "Minimalist web framework"
 - [`sequelize`](https://sequelize.org/master/index.html) - "Promise based Node.js ORM"
 - [`body-parser`](https://github.com/expressjs/body-parser#readme) - Middleware for parsing request bodies (in this case, for parsing JSON).
-- [`dotenv`]() - Library for loading environment variables directly from a file name `.env` in root directory.
+- [`dotenv`]() - Library for loading environment variables directly from a file named `.env` in root directory.
 
 # Modifications
 
