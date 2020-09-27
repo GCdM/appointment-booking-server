@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const { Op } = require("sequelize");
 
-const db = require("./database/db");
+const db = require("./database/models");
 
 const app = express();
 const PORT = 3000;
