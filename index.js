@@ -30,6 +30,7 @@ app.get("/availabilities", async (req, res) => {
     appointment_medium: medium,
   } = req.query;
 
+  const errors = [];
   const where = {};
 
   // if (dateRange || type || medium) {
@@ -39,6 +40,12 @@ app.get("/availabilities", async (req, res) => {
     const fromDate = new Date(fromDateString);
     const toDate = new Date(toDateString);
 
+    if (isNaN(fromDate) || isNaN(toDate)) {
+      // If either date is invalid, create clear error message(s)
+      errors.push(
+        "Invalid date_range value. Make sure to follow format YYYY-MM-DD/YYYY-MM-DD."
+      );
+    }
     // Add 1 day to the end date, so that results include it
     toDate.setDate(toDate.getDate() + 1);
 
@@ -47,9 +54,23 @@ app.get("/availabilities", async (req, res) => {
       [Op.lte]: toDate,
     };
   }
+
+  if (type && !["consultation", "one_off"].includes(type)) {
+    errors.push(
+      `Invalid appointment_type: ${type}. Make sure it is one of 'consultation' or 'one_off'.`
+    );
+  }
+
+  if (medium && !["video", "phone"].includes(medium)) {
+    errors.push(
+      `Invalid appointment_medium: ${medium}. Make sure it is one of 'video' or 'phone'.`
+    );
+  }
   // }
 
   try {
+    if (errors.length) throw errors;
+
     const allAvailabilities = await db.Availability.findAll({ where });
 
     // Filter

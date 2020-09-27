@@ -22,13 +22,13 @@ paths:
           in: query
           description: Type of appointment to filter availabilities by.
           example: "consultation"
-          schema":
+          schema:
             type: string
         - name: appointment_medium
           in: query
           description: Appointment medium to filter availabilities by.
           example: "phone"
-          schema":
+          schema:
             type: string
       responses:
         200:
