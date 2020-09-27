@@ -112,6 +112,14 @@ app.post("/availabilities", async (req, res) => {
   const { counsellor_id: counsellorId, datetime } = req.body;
 
   try {
+    const existingAvailability = await db.Availability.findOne({
+      where: { counsellorId, datetime },
+    });
+    if (existingAvailability)
+      throw Error(
+        `This counsellor already has an availability for ${datetime}.`
+      );
+
     const newAvailability = await db.Availability.create({
       counsellorId,
       datetime,
@@ -120,12 +128,15 @@ app.post("/availabilities", async (req, res) => {
     res.status(200).json(newAvailability);
   } catch ({ message }) {
     let error = message;
-    debugger;
+
+    // Create clearer error messages
     if (message.includes("invalid input")) {
+      // Check which input is invalid
       error = message.includes("timestamp")
         ? `Invalid datetime: ${datetime}. Make sure it follow format YYYY-MM-DD.`
         : `Invalid counsellor_id: ${counsellorId}. This could be because the counsellor doesn't exist or the value is not a valid id.`;
     } else if (message.includes("notNull Violation")) {
+      // notNull Violation means one of the inputs was missing
       error =
         "Missing value. Request body must include both counsellor_id and datetime.";
     }
