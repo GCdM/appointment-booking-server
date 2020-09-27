@@ -118,7 +118,11 @@ app.post("/availabilities", async (req, res) => {
     });
 
     res.status(200).json(newAvailability);
-  } catch (error) {
+  } catch ({ message }) {
+    const error = message.includes("timestamp")
+      ? `Invalid datetime: ${datetime}. Make sure it follow format YYYY-MM-DD.`
+      : `Invalid counsellor_id: ${counsellorId}. This could be because the counsellor doesn't exist or the value is not a valid id.`;
+
     res.status(422).json({ error });
   }
 });
