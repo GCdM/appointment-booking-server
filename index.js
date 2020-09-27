@@ -109,7 +109,7 @@ app.get("/availabilities", async (req, res) => {
 });
 
 app.post("/availabilities", async (req, res) => {
-  const { counsellorId, datetime } = req.body;
+  const { counsellor_id: counsellorId, datetime } = req.body;
 
   try {
     const newAvailability = await db.Availability.create({
@@ -119,9 +119,16 @@ app.post("/availabilities", async (req, res) => {
 
     res.status(200).json(newAvailability);
   } catch ({ message }) {
-    const error = message.includes("timestamp")
-      ? `Invalid datetime: ${datetime}. Make sure it follow format YYYY-MM-DD.`
-      : `Invalid counsellor_id: ${counsellorId}. This could be because the counsellor doesn't exist or the value is not a valid id.`;
+    let error = message;
+    debugger;
+    if (message.includes("invalid input")) {
+      error = message.includes("timestamp")
+        ? `Invalid datetime: ${datetime}. Make sure it follow format YYYY-MM-DD.`
+        : `Invalid counsellor_id: ${counsellorId}. This could be because the counsellor doesn't exist or the value is not a valid id.`;
+    } else if (message.includes("notNull Violation")) {
+      error =
+        "Missing value. Request body must include both counsellor_id and datetime.";
+    }
 
     res.status(422).json({ error });
   }
