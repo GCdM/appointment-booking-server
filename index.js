@@ -86,41 +86,44 @@ app.get("/availabilities", async (req, res) => {
 });
 
 app.post("/availabilities", async (req, res) => {
-  const { counsellor_id: counsellorId, datetime } = req.body;
+  const { counsellor_id: counsellorId, datetimes } = req.body;
 
-  // Check if Availability already exists
-  const existingAvailability = await db.Availability.findOne({
-    where: { counsellorId, datetime },
-  });
-
-  if (existingAvailability)
-    return res.status(409).json({
-      error: `This counsellor already has an availability for ${datetime}.`,
+  if (!counsellorId || !datetimes || !datetimes.length) {
+    return res.status(400).json({
+      error:
+        "Missing required parameter: make sure to include `counsellor_id` and `datetimes` in body of request.",
     });
+  }
 
   try {
-    const newAvailability = await db.Availability.create({
-      counsellorId,
-      datetime,
-    });
+    const counsellor = await db.Counsellor.findByPk(counsellorId);
 
-    res.status(200).json(newAvailability);
-  } catch ({ message }) {
-    let error = message;
-
-    // Create clearer error messages
-    if (message.includes("invalid input")) {
-      // Check which input is invalid
-      error = message.includes("timestamp")
-        ? `Invalid datetime: ${datetime}. Make sure it follow format YYYY-MM-DD.`
-        : `Invalid counsellor_id: ${counsellorId}. This could be because the counsellor doesn't exist or the value is not a valid id.`;
-    } else if (message.includes("notNull Violation")) {
-      // notNull Violation means one of the inputs was missing
-      error =
-        "Missing value. Request body must include both counsellor_id and datetime.";
+    if (counsellor === null) {
+      return res.status(404).json({
+        error: `There is no existing counsellor with id: ${counsellorId}.`,
+      });
     }
 
-    res.status(422).json({ error });
+    // Check that all datetimes are valid
+    datetimes.forEach((datetime) => {
+      if (isNaN(new Date(datetime))) {
+        return res.status(422).json({
+          error: `Invalid datetime: ${datetime}.`,
+        });
+      }
+    });
+
+    const newAvailabilitiesPromises = datetimes.map((datetime) =>
+      counsellor.createAvailability({ datetime })
+    );
+
+    const newAvailabilities = await Promise.all(newAvailabilitiesPromises);
+
+    res.status(200).json(newAvailabilities);
+  } catch (error) {
+    return res.status(400).json({
+      error: `Invalid counsellor_id: ${counsellorId}.`,
+    });
   }
 });
 
