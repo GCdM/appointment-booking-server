@@ -14,7 +14,7 @@ The application is currently set up to connect to a locally run Postgres server,
   createdb appointment_booking_service_development -U postgres
 ```
 
-_If you'd like to use different configuration for your database, you can change these values in `./database/db.js`, when creating a `new Sequelize(...)` object_
+_If you'd like to use a different configuration for your database, you can change these values in `./.env` (which I purposefully did not `.gitignore`)._
 
 ## Seed the database
 
@@ -55,8 +55,13 @@ I chose to use Sequelize as it is a popular ORM that I had a bit of experience w
 - [`express`](https://expressjs.com/) - "Minimalist web framework"
 - [`sequelize`](https://sequelize.org/master/index.html) - "Promise based Node.js ORM"
 - [`body-parser`](https://github.com/expressjs/body-parser#readme) - Middleware for parsing request bodies (in this case, for parsing JSON).
+- [`dotenv`]() - Library for loading environment variables directly from a file name `.env` in root directory.
 
-# Modifications / Deviations
+# Modifications
 
 - Rather than using the original availabilties' ids, I decided to use an auto-incremented integer, as I wasn't sure what scheme was originally being used, and didn't want to create conflicts. I kept a copy of the original ids in the `availability` table just in case, and called it `originalId`. For new availabilities, this value is set to `NULL`.
 - Would have liked to change the `date_range` query parameter into 2 separate values, rather than concatenating and splitting strings.
+
+# Future Considerations
+
+- The current filtering of availabilities for GET /availabilities request is very expensive and slow. I would have liked to use Sequelize's querying methods so the filtering is done at the SQL level, rather than through multiple asynchronous database calls. This would be my highest priority next improvement.

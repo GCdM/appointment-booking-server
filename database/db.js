@@ -4,13 +4,13 @@ const { Sequelize } = require("sequelize");
 console.log("Connecting to database...");
 
 const sequelize = new Sequelize(
-  "appointment_booking_service_development",
-  "postgres",
-  undefined,
+  process.env.SEQUELIZE_DB_NAME,
+  process.env.SEQUELIZE_DB_USER,
+  process.env.SEQUELIZE_DB_PASSWORD,
   {
     host: "localhost",
-    port: 5432,
-    dialect: "postgres",
+    port: process.env.SEQUELIZE_DB_CONN_PORT,
+    dialect: process.env.SEQUELIZE_DB_DIALECT,
     logging: false,
   }
 );

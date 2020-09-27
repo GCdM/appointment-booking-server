@@ -1,3 +1,5 @@
+if (process.env.NODE_ENV !== "production") require("dotenv").config();
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const { Op } = require("sequelize");
@@ -5,23 +7,23 @@ const { Op } = require("sequelize");
 const db = require("./database/models");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.EXPRESS_PORT;
 
 app.use(bodyParser.json());
 
-// app.use((req, res, next) => {
-//   // Logging middleware for development/debugging
-//   console.log("\n>>> >>> >>> >>> REQUEST >>> >>> >>> >>>\n");
-//   console.log(req.method, "\t", req.path);
-//   if (req.method === "GET") {
-//     console.log("\nreq.query: ", req.query);
-//   } else {
-//     console.log("\nreq.body: ", req.body);
-//   }
-//   console.log("\n<<< <<< <<< <<< <<< <<< <<< <<< <<< <<<");
+app.use((req, res, next) => {
+  // Logging middleware for development/debugging
+  console.log(">>> >>> >>> >>> REQUEST >>> >>> >>> >>>\n");
+  console.log(req.method, "\t", req.path);
+  if (req.method === "GET") {
+    console.log("\nreq.query: ", req.query);
+  } else {
+    console.log("\nreq.body: ", req.body);
+  }
+  console.log("\n<<< <<< <<< <<< <<< <<< <<< <<< <<< <<<");
 
-//   next();
-// });
+  next();
+});
 
 app.get("/availabilities", async (req, res) => {
   const {
