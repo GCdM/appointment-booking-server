@@ -33,6 +33,8 @@ app.get("/availabilities", async (req, res) => {
   const errors = [];
   const where = {};
 
+  // Check if all input values are valid
+  ///////////////////////////////////////
   if (type && !["consultation", "one_off"].includes(type)) {
     errors.push(
       `Invalid appointment_type: ${type}. Make sure it is one of 'consultation' or 'one_off'.`
@@ -46,7 +48,6 @@ app.get("/availabilities", async (req, res) => {
   }
 
   if (dateRange) {
-    // Prepare filtering conditions by creating `where` object in accordance with Sequelize's documentation
     const [fromDateString, toDateString] = dateRange.split("/");
     const fromDate = new Date(fromDateString);
     const toDate = new Date(toDateString);
@@ -60,6 +61,7 @@ app.get("/availabilities", async (req, res) => {
     // Add 1 day to the end date, so that results include it
     toDate.setDate(toDate.getDate() + 1);
 
+    // Prepare filtering conditions by creating `where` object in accordance with Sequelize's documentation
     where.datetime = {
       [Op.gte]: fromDate,
       [Op.lte]: toDate,
@@ -84,16 +86,17 @@ app.get("/availabilities", async (req, res) => {
 app.post("/availabilities", async (req, res) => {
   const { counsellor_id: counsellorId, datetime } = req.body;
 
-  try {
-    const existingAvailability = await db.Availability.findOne({
-      where: { counsellorId, datetime },
+  // Check if Availability already exists
+  const existingAvailability = await db.Availability.findOne({
+    where: { counsellorId, datetime },
+  });
+
+  if (existingAvailability)
+    return res.status(409).json({
+      error: `This counsellor already has an availability for ${datetime}.`,
     });
 
-    if (existingAvailability)
-      throw Error(
-        `This counsellor already has an availability for ${datetime}.`
-      );
-
+  try {
     const newAvailability = await db.Availability.create({
       counsellorId,
       datetime,
